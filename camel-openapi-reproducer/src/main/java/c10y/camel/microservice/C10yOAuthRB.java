@@ -41,6 +41,7 @@ public class C10yOAuthRB extends RouteBuilder {
 			.bindingMode(RestBindingMode.json)
 			.scheme("http") // TODO 10 https scheme - requires cert?
 			.contextPath("api")
+			.apiComponent("openapi")
 			.apiContextPath("api-doc")	// FIXME 10 java.lang.NoSuchMethodError: com.fasterxml.jackson.databind.introspect.AnnotatedMember.getType(Lcom/fasterxml/jackson/databind/type/TypeBindings;)Lcom/fasterxml/jackson/databind/JavaType;
 			.dataFormatProperty("prettyPrint", "true")
 			.clientRequestValidation(true)
