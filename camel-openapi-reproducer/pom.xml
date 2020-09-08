@@ -1,0 +1,342 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<!--Get required dependencies from parent 
+	JMR: not sure this is required with camel BOM?
+	<parent>
+		<groupId>org.apache.camel</groupId>
+		<artifactId>camel-dependencies</artifactId>
+		<version>3.4.0</version>
+	</parent>
+	-->
+
+	<groupId>commissionly.io</groupId>
+	<artifactId>c10y-integration-java</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<properties>
+		<project.artifactId>c10y-integration</project.artifactId>
+		<!-- latest versions @ Jul 2020 -->
+		<java.version>11</java.version>
+		<camel.version>3.4.2</camel.version>	<!-- 3.4.x is latest long term support version -->
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+		<spring-boot.version>2.3.0.RELEASE</spring-boot.version>
+		<!-- Salesforce Rest API version: GET https://parasoft.my.salesforce.com/services/data/ -->
+		<camel-sfdc.apiVersion>49.0</camel-sfdc.apiVersion>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<run.profiles>dev</run.profiles>
+
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!--Import as a pom to let spring-boot to manage spring-boot dependency 
+				versions -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!--Import as a pom to let camel to manage camel-spring-boot dependency 
+				versions -->
+			<dependency>
+				<groupId>org.apache.camel.springboot</groupId>
+				<artifactId>camel-spring-boot-dependencies</artifactId>
+				<version>${camel.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+	
+		<!-- Camel Starter -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-spring-boot-starter</artifactId>
+		</dependency>
+
+		<!-- Data format: JSON [un]marshalling using Jackson -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-jackson-starter</artifactId>
+		</dependency>
+
+		<!-- Data format: JSON [un]marshalling using Google Gson - 28/8/20: not used ATM
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-gson-starter</artifactId>
+		</dependency> -->
+
+		<!-- Component: Not in List of Starters https://camel.apache.org/camel-spring-boot/latest/list.html -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-core-starter</artifactId>
+		</dependency>
+
+		<!-- Component: Send requests to external HTTP servers using Apache HTTP Client 4.x. -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-http-starter</artifactId>
+		</dependency>
+
+		<!-- Component: Salesforce -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-salesforce-starter</artifactId>
+		</dependency>
+
+		<!-- Component: Allows triggering events at specific time intervals -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-cron-starter</artifactId>
+		</dependency>
+
+		<!-- Component: Log messages to the underlying logging mechanism. -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-log-starter</artifactId>
+		</dependency>
+
+		<!-- Component: Perform SQL queries using Spring JDBC. -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-sql-starter</artifactId>
+		</dependency>
+
+		<!-- Component: Access databases through SQL and JDBC. -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-jdbc-starter</artifactId>
+		</dependency>
+	
+		<!-- Deployment to Tomcat: see https://www.baeldung.com/spring-boot-war-tomcat-deploy -->
+		<!--Spring boot dependencies to enable WEB and TOMCAT features -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<!-- removes embedded Tomcat -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- Component: To create REST services using REST DSL -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-rest-starter</artifactId>
+		</dependency>
+		<!-- Use Swagger with Rest DSL -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-openapi-java-starter</artifactId>
+		</dependency>
+		<!-- Component: Serve HTTP requests by a Servlet. -->
+		<!-- in conjunction with restConfiguration().component("camel-servlet") -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-servlet-starter</artifactId>
+		</dependency>
+
+
+		<!--Spring boot dependencies to enable JDBC features -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+	
+		<!-- Component: Expose HTTP endpoints using the HTTP server available in the current platform. -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-platform-http-starter</artifactId>
+		</dependency>
+
+
+		<!-- Language: Apache Groovy [14/8/20: not needed ATM]
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-groovy-starter</artifactId>
+		</dependency> -->
+
+		<!-- data type: CSV -->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-csv-starter</artifactId>
+		</dependency>
+
+		<!-- Use CXF HTTP transport to run Camel in Tomcat -->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http</artifactId>
+		</dependency>
+
+		<!-- Needed for Hawtio to detect Camel Context -->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-management</artifactId>
+		</dependency>
+
+		<!-- MySQL JDBC connector -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.20</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- SQL Server JDBC driver -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>8.2.2.jre11</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- from .../camel-in-action-2/chapter9/spring-boot-test-one-route/pom.xml -->
+		<!-- test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- testing -->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test-spring</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Spring Java Configuration
+		See https://camel.apache.org/components/latest/others/spring-javaconfig.html
+		See https://github.com/apache/camel/blob/master/components/camel-spring-javaconfig/pom.xml
+		-->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-spring-javaconfig</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test-spring-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Required for jsonschema2pojo generated classes -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		</dependency>
+
+<!-- 
+
+		<!- - logging - ->	
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+
+		<!- - Component: Configure REST producers based on an OpenAPI specification document 
+			delegating to a component implementing the RestProducerFactory interface. - ->
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-rest-openapi-starter</artifactId>
+		</dependency>
+ -->
+ 			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-mail</artifactId>
+				<version>2.13.0</version>
+			</dependency>
+		
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<release>11</release>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+
+			<!-- for creating salesforce POJOs/DTOs -->
+			<plugin>
+				<groupId>org.apache.camel.maven</groupId>
+				<artifactId>camel-salesforce-maven-plugin</artifactId>
+				<version>${camel.version}</version> <!--  should come from pom? -->
+				<configuration>
+					<clientId>${camel-sfdc.clientId}</clientId>
+					<clientSecret>${camel-sfdc.clientSecret}</clientSecret>
+					<userName>${camel-sfdc.userName}</userName>
+					<password>${camel-sfdc.password}</password>
+					<loginUrl default-value="https://login.salesforce.com">${camel-sfdc.loginUrl}</loginUrl>
+					<useStringsForPicklists>true</useStringsForPicklists><!-- still generates enums, though not referenced -->
+					<!-- does nothing in Camel 3.4.2 jsonSchema>true</jsonSchema --><!-- true to generate json schema instead of DTOs, default is false -->
+					
+					<!-- parasoft -->
+					<version>${camel-sfdc.apiVersion}</version>
+					<packageName>c10y.model.sfdc.parasoft</packageName>
+					<includes>
+						<include>Account</include>
+						<include>Invoice__c</include>
+						<include>Opportunity</include>
+						<include>OpportunityLineItem</include>
+						<include>OpportunitySplit</include>
+						<include>OpportunitySplitType</include>
+						<include>Product2</include>
+						<include>User</include>
+					</includes>
+
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>1.4.2.RELEASE</version>
+				<executions>
+				 <execution>
+				  <goals>
+				   <goal>repackage</goal>
+				  </goals>
+				 </execution>
+				</executions>
+			</plugin>
+		
+		</plugins>
+	</build>
+
+</project>
