@@ -37,7 +37,7 @@ public class C10yOAuthRB extends RouteBuilder {
 
 		// TODO 20 we'll need a global one somewhere, I guess?
 		restConfiguration()
-			.component("servlet")	 // FIXME 10 "camel-servlet" (when running in Tomcat or WildFly) raises: No bean could be found in the registry for: camel-servlet of type: org.apache.camel.spi.RestApiConsumerFactory
+			.component("openapi")	 // FIXME 10 "camel-servlet" (when running in Tomcat or WildFly) raises: No bean could be found in the registry for: camel-servlet of type: org.apache.camel.spi.RestApiConsumerFactory
 			.bindingMode(RestBindingMode.json)
 			.scheme("http") // TODO 10 https scheme - requires cert?
 			.contextPath("api")
