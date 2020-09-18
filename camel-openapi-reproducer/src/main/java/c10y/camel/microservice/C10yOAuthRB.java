@@ -37,15 +37,22 @@ public class C10yOAuthRB extends RouteBuilder {
 
 		// TODO 20 we'll need a global one somewhere, I guess?
 		restConfiguration()
-			.component("openapi")	 // FIXME 10 "camel-servlet" (when running in Tomcat or WildFly) raises: No bean could be found in the registry for: camel-servlet of type: org.apache.camel.spi.RestApiConsumerFactory
+			.component("servlet")
 			.bindingMode(RestBindingMode.json)
 			.scheme("http") // TODO 10 https scheme - requires cert?
 			.contextPath("api")
-			.apiComponent("openapi")
-			.apiContextPath("api-doc")	// FIXME 10 java.lang.NoSuchMethodError: com.fasterxml.jackson.databind.introspect.AnnotatedMember.getType(Lcom/fasterxml/jackson/databind/type/TypeBindings;)Lcom/fasterxml/jackson/databind/JavaType;
 			.dataFormatProperty("prettyPrint", "true")
 			.clientRequestValidation(true)
-		;
+			// open api (ex swagger)
+			.apiComponent("openapi")
+			.apiContextPath("api-doc")
+            .apiProperty("api.title", "Commissionly Micro-services")
+            .apiProperty("api.version", "1.0")
+            .apiProperty("cors", "true");
+			;
+/*
+
+ */
 		
 		onException(Exception.class)
 			.handled(true)
