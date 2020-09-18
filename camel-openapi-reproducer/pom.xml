@@ -4,15 +4,6 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<!--Get required dependencies from parent 
-	JMR: not sure this is required with camel BOM?
-	<parent>
-		<groupId>org.apache.camel</groupId>
-		<artifactId>camel-dependencies</artifactId>
-		<version>3.4.0</version>
-	</parent>
-	-->
-
 	<groupId>commissionly.io</groupId>
 	<artifactId>c10y-integration-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -21,10 +12,11 @@
 	<properties>
 		<project.artifactId>c10y-integration</project.artifactId>
 		<!-- latest versions @ Jul 2020 -->
-		<java.version>11</java.version>
-		<camel.version>3.4.2</camel.version>	<!-- 3.4.x is latest long term support version -->
+		<java.release>14</java.release>
+		<camel.version>3.5.0</camel.version>	<!-- 3.4.x is latest long term support version -->
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+		<maven-war-plugin.version>3.3.1</maven-war-plugin.version>
 		<spring-boot.version>2.3.0.RELEASE</spring-boot.version>
 		<!-- Salesforce Rest API version: GET https://parasoft.my.salesforce.com/services/data/ -->
 		<camel-sfdc.apiVersion>49.0</camel-sfdc.apiVersion>
@@ -37,8 +29,7 @@
 	<dependencyManagement>
 		<dependencies>
 
-			<!--Import as a pom to let spring-boot to manage spring-boot dependency 
-				versions -->
+			<!--Inherit defaults from Spring Boot -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
@@ -47,8 +38,7 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!--Import as a pom to let camel to manage camel-spring-boot dependency 
-				versions -->
+			<!--Inherit defaults from Camel -->
 			<dependency>
 				<groupId>org.apache.camel.springboot</groupId>
 				<artifactId>camel-spring-boot-dependencies</artifactId>
@@ -205,7 +195,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- from .../camel-in-action-2/chapter9/spring-boot-test-one-route/pom.xml -->
+		<!-- See https://camel.apache.org/manual/latest/camel-3x-upgrade-guide-3_5.html#_spring_boot_testing_with_junit_5 -->
 		<!-- test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -214,16 +204,22 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test-spring-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+<!-- 
+		<dependency>
+			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- testing -->
+		<!- - testing - ->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-test-spring</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+ -->
 		<!-- Spring Java Configuration
 		See https://camel.apache.org/components/latest/others/spring-javaconfig.html
 		See https://github.com/apache/camel/blob/master/components/camel-spring-javaconfig/pom.xml
@@ -231,11 +227,6 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring-javaconfig</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-test-spring-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -264,11 +255,10 @@
 			<artifactId>camel-rest-openapi-starter</artifactId>
 		</dependency>
  -->
- 			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-mail</artifactId>
-				<version>2.13.0</version>
-			</dependency>
+	<dependency>
+		<groupId>org.apache.camel.springboot</groupId>
+		<artifactId>camel-mail-starter</artifactId>
+	</dependency>
 		
 	</dependencies>
 
@@ -280,7 +270,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<release>11</release>
+					<release>${java.release}</release>
 				</configuration>
 			</plugin>
 
@@ -323,16 +313,34 @@
 
 				</configuration>
 			</plugin>
+			
+			<!-- package executable jar or war archives, run SB apps, generate build info & start SB app prior to running integration tests -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
 				<executions>
-				 <execution>
-				  <goals>
-				   <goal>repackage</goal>
-				  </goals>
-				 </execution>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		
+			<!-- not using web.xml so do not fail -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>${maven-war-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>default-war</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<failOnMissingWebXml>false</failOnMissingWebXml>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		
